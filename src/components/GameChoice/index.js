@@ -5,12 +5,27 @@ const GameChoice = props => {
   const {id, imageUrl} = choice
 
   const onClickChoiceButton = () => {
-    onSelectChoice(imageUrl)
+    onSelectChoice(imageUrl, id)
+  }
+
+  let testId
+
+  if (id === 'ROCK') {
+    testId = 'rockButton'
+  } else if (id === 'SCISSORS') {
+    testId = 'scissorsButton'
+  } else {
+    testId = 'paperButton'
   }
 
   return (
     <ListItem>
-      <ChoiceButton onClick={onClickChoiceButton} type="button">
+      <ChoiceButton
+        data-testid={testId}
+        as="button"
+        onClick={onClickChoiceButton}
+        type="button"
+      >
         <ChoiceImage src={imageUrl} alt={id} />
       </ChoiceButton>
     </ListItem>

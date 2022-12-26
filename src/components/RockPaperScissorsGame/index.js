@@ -8,7 +8,6 @@ import {
   AppContainer,
   ResponsiveContainer,
   ScoreContainer,
-  ChoicesTextContainer,
   ChoiceText,
   ScoreCard,
   ScoreText,
@@ -22,8 +21,11 @@ import {
   Player,
   PlayAgain,
   GameResultsContainer,
+  ResultsContainer,
+  GameResult,
+  GameResultText,
+  ChoiceImage,
 } from './styledComponents'
-import {ChoiceImage} from '../GameChoice/styledComponents'
 
 const choicesList = [
   {
@@ -46,30 +48,121 @@ const rulesImageUrl =
   'https://assets.ccbp.in/frontend/react-js/rock-paper-scissor/rules-image.png'
 
 class RockPaperScissorsGame extends Component {
-  state = {isGameOver: false, yourChoice: ''}
+  state = {
+    isGameOver: false,
+    yourChoice: '',
+    gameResult: '',
+    opponentChoice: '',
+    score: 0,
+  }
 
-  onSelectChoice = yourChoice => {
-    this.setState({isGameOver: true, yourChoice})
+  onClickChoiceButton = event => {
+    const yourChoiceId = event.target.alt
+
+    const opponentChoiceIndex = Math.floor(Math.random() * 3)
+    const opponentChoice = choicesList[opponentChoiceIndex].imageUrl
+    const opponentChoiceId = choicesList[opponentChoiceIndex].id
+    if (yourChoiceId === opponentChoiceId) {
+      this.setState({gameResult: 'IT IS DRAW'})
+    } else if (
+      (yourChoiceId === 'ROCK' && opponentChoiceId === 'SCISSORS') ||
+      (yourChoiceId === 'SCISSORS' && opponentChoiceId === 'PAPER') ||
+      (yourChoiceId === 'PAPER' && opponentChoiceId === 'ROCK')
+    ) {
+      this.setState(prevState => ({
+        score: prevState.score + 1,
+        gameResult: 'YOU WON',
+      }))
+    } else {
+      this.setState(prevState => ({
+        score: prevState.score - 1,
+        gameResult: 'YOU LOSE',
+      }))
+    }
+
+    this.setState({
+      isGameOver: true,
+      yourChoice: event.target.src,
+      opponentChoice,
+    })
+  }
+
+  onSelectChoice = (yourChoice, yourChoiceId) => {
+    const opponentChoiceIndex = Math.floor(Math.random() * 3)
+    const opponentChoice = choicesList[opponentChoiceIndex].imageUrl
+    const opponentChoiceId = choicesList[opponentChoiceIndex].id
+    if (yourChoiceId === opponentChoiceId) {
+      this.setState({gameResult: 'IT IS DRAW'})
+    } else if (
+      (yourChoiceId === 'ROCK' && opponentChoiceId === 'SCISSORS') ||
+      (yourChoiceId === 'SCISSORS' && opponentChoiceId === 'PAPER') ||
+      (yourChoiceId === 'PAPER' && opponentChoiceId === 'ROCK')
+    ) {
+      this.setState(prevState => ({
+        score: prevState.score + 1,
+        gameResult: 'YOU WON',
+      }))
+    } else {
+      this.setState(prevState => ({
+        score: prevState.score - 1,
+        gameResult: 'YOU LOSE',
+      }))
+    }
+
+    this.setState({isGameOver: true, yourChoice, opponentChoice})
+  }
+
+  onClickPlayAgain = () => {
+    this.setState({isGameOver: false})
   }
 
   renderGameResultsView = () => {
-    const {yourChoice} = this.state
-
-    const opponentChoice = Math.floor(Math.random() * 3)
+    const {yourChoice, gameResult, opponentChoice} = this.state
 
     return (
       <GameResultsContainer>
-        <Player>You</Player>
-        <ChoiceImage src={yourChoice} alt="your choice" />
-        <Player>You</Player>
-        <ChoiceImage src={yourChoice} alt="opponent choice" />
-        <PlayAgain type="button">Play Again</PlayAgain>
+        <ResultsContainer>
+          <Player>You</Player>
+          <ChoiceImage src={yourChoice} alt="your choice" />
+        </ResultsContainer>
+        <ResultsContainer>
+          <Player>Opponent</Player>
+          <ChoiceImage src={opponentChoice} alt="opponent choice" />
+        </ResultsContainer>
+        <GameResult>
+          <GameResultText>{gameResult}</GameResultText>
+          <PlayAgain onClick={this.onClickPlayAgain} type="button">
+            Play Again
+          </PlayAgain>
+        </GameResult>
       </GameResultsContainer>
     )
   }
 
   renderGameChoices = () => (
     <ChoicesContainer>
+      {/* <ChoiceButton
+        data-testid="rockButton"
+        onClick={this.onClickChoiceButton}
+        type="button"
+      >
+        <ChoiceImage src={choicesList[0].imageUrl} alt={choicesList[0].id} />
+      </ChoiceButton>
+      <ChoiceButton
+        data-testid="scissorsButton"
+        onClick={this.onClickChoiceButton}
+        type="button"
+      >
+        <ChoiceImage src={choicesList[1].imageUrl} alt={choicesList[1].id} />
+      </ChoiceButton>
+      <ChoiceButton
+        data-testid="paperButton"
+        onClick={this.onClickChoiceButton}
+        type="button"
+      >
+        <ChoiceImage src={choicesList[2].imageUrl} alt={choicesList[2].id} />
+      </ChoiceButton> */}
+
       {choicesList.map(choice => (
         <GameChoice
           onSelectChoice={this.onSelectChoice}
@@ -109,19 +202,16 @@ class RockPaperScissorsGame extends Component {
   )
 
   render() {
-    const {isGameOver} = this.state
+    const {isGameOver, score} = this.state
     return (
       <AppContainer>
         <ResponsiveContainer>
           <ScoreContainer>
-            <ChoicesTextContainer>
-              <ChoiceText>Rock</ChoiceText>
-              <ChoiceText>Paper</ChoiceText>
-              <ChoiceText>Scissors</ChoiceText>
-            </ChoicesTextContainer>
+            <ChoiceText>Rock Paper Scissors</ChoiceText>
+
             <ScoreCard as="div">
               <ScoreText>Score</ScoreText>
-              <ScoreValue>0</ScoreValue>
+              <ScoreValue>{score}</ScoreValue>
             </ScoreCard>
           </ScoreContainer>
           {!isGameOver && this.renderGameChoices()}
